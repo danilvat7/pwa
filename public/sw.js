@@ -1,5 +1,5 @@
-const CACHE_STATIC_NAME = 'static-v3';
-const CACHE_DYNAMIC_NAME = 'dynamic-v2';
+const CACHE_STATIC_NAME = 'static-v9';
+const CACHE_DYNAMIC_NAME = 'dynamic-v4';
 
 self.addEventListener('install', event => {
     console.log('[Service Worker] Installing Service Worker...', event);
@@ -10,6 +10,7 @@ self.addEventListener('install', event => {
             cache.addAll([
                 '/',
                 '/index.html',
+                '/offline.html',
                 '/src/js/app.js',
                 '/src/js/feed.js',
                 '/src/js/promise.js',
@@ -42,23 +43,59 @@ self.addEventListener('activate', event => {
     return self.clients.claim();
 });
 
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request).then(response => {
-            if (response) {
-                return response;
-            } else {
-                return fetch(event.request).then(res => {
-                    return caches
-                        .open(CACHE_DYNAMIC_NAME)
-                        .then(cache => {
-                            cache.put(event.request.url, res.clone());
-                            return res;
-                        })
-                }).catch(err => {
+// self.addEventListener('fetch', event => {
+//     event.respondWith(
+//         caches.match(event.request).then(response => {
+//             if (response) {
+//                 return response;
+//             } else {
+//                 return fetch(event.request).then(res => {
+//                     return caches
+//                         .open(CACHE_DYNAMIC_NAME)
+//                         .then(cache => {
+//                             cache.put(event.request.url, res.clone());
+//                             return res;
+//                         })
+//                 }).catch(err => {
+//                     return caches.open(CACHE_STATIC_NAME).then(cache => {
+//                         return cache.match('/offline.html');
+//                     })
+//                 });
+//             }
+//         })
+//     );
+// });
 
-                });
-            }
-        })
-    );
-});
+
+// cache only
+// self.addEventListener('fetch', event => {
+//     event.respondWith(
+//         caches.match(event.request));
+// });
+
+
+// Network only
+// self.addEventListener('fetch', event => {
+//     event.respondWith(
+//         fetch(event.request));
+// });
+
+// Network with cache fallback
+// self.addEventListener('fetch', event => {
+//     event.respondWith(
+//         fetch(event.request)
+//         .then(res => {
+//             return caches
+//                 .open(CACHE_DYNAMIC_NAME)
+//                 .then(cache => {
+//                     cache.put(event.request.url, res.clone());
+//                     return res;
+//                 })
+//         })
+//         .catch(err => {
+//             console.log(12);
+
+//             return caches.match(event.request);
+//         })
+//     );
+// });
