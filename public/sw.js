@@ -1,4 +1,4 @@
-const CACHE_STATIC_NAME = 'static-v9';
+const CACHE_STATIC_NAME = 'static-v10';
 const CACHE_DYNAMIC_NAME = 'dynamic-v4';
 
 self.addEventListener('install', event => {
@@ -41,6 +41,46 @@ self.addEventListener('activate', event => {
         })
     )
     return self.clients.claim();
+});
+
+self.addEventListener('fetch', event => {
+    const url = 'https://httpbin.org/get';
+    if (event.request.url.indexOf(url) > -1) {
+        event.respondWith(
+            caches.open(CACHE_DYNAMIC_NAME)
+            .then(cache => {
+                return fetch(event.request)
+                    .then(res => {
+                        cache.put(event.request, res.clone());
+                        return res;
+                    });
+            })
+        );
+    } else {
+        event.respondWith(
+            caches.match(event.request).then(response => {
+                if (response) {
+                    return response;
+                } else {
+                    return fetch(event.request).then(res => {
+                        return caches
+                            .open(CACHE_DYNAMIC_NAME)
+                            .then(cache => {
+                                cache.put(event.request.url, res.clone());
+                                return res;
+                            })
+                    }).catch(err => {
+                        return caches.open(CACHE_STATIC_NAME).then(cache => {
+                            if (event.request.url.indexOf('/help') > -1) {
+                                return cache.match('/offline.html');
+                            }
+                        })
+                    });
+                }
+            })
+        )
+    }
+
 });
 
 // self.addEventListener('fetch', event => {
