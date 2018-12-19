@@ -1,4 +1,4 @@
-const CACHE_STATIC_NAME = 'static-v1';
+const CACHE_STATIC_NAME = 'static-v2';
 const CACHE_DYNAMIC_NAME = 'dynamic-v1';
 const STATIC_FILES = [
   '/',
@@ -57,7 +57,7 @@ function isInArray(string, array) {
 }
 
 self.addEventListener('fetch', event => {
-  var url = 'https://httpbin.org/get';
+  var url = 'https://pwagram-d6801.firebaseio.com/posts';
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
       caches.open(CACHE_DYNAMIC_NAME).then(cache => {
